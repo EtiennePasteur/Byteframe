@@ -1,33 +1,35 @@
 const sql = require('sql-template-strings');
-const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcrypt');
 const db = require('./db');
 
 module.exports = {
-  async create(email, password) {
+  async insert(uuid) {
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const {rows} = await db.query(sql`
-      INSERT INTO users (id, email, password)
-        VALUES (${uuidv4()}, ${email}, ${hashedPassword})
-        RETURNING id, email;
-      `);
-
+      const {rows} = await db.query(sql`INSERT INTO users (uuid) VALUES (${uuid}) RETURNING *;`);
       const [user] = rows;
       return user;
     } catch (error) {
-      if (error.constraint === 'users_email_key') {
-        return null;
-      }
-
-      throw error;
     }
   },
-  async find(email) {
-    const {rows} = await db.query(sql`
-    SELECT * FROM users WHERE email=${email} LIMIT 1;
-    `);
+  async update(uuid, home, home_lat, home_lng, work, work_lat, work_lng, travel_mode, next_image) {
+    try {
+      const {rows} = await db.query(sql`
+        UPDATE users SET
+            home = ${home},
+            home_lat = ${home_lat},
+            home_lng = ${home_lng},
+            work = ${work},
+            work_lat = ${work_lat},
+            work_lng = ${work_lng},
+            travel_mode = ${travel_mode},
+            next_image = ${next_image}
+        WHERE uuid = ${uuid} RETURNING *;`);
+      const [user] = rows;
+      return user;
+    } catch (error) {
+    }
+  },
+  async find(uuid) {
+    const {rows} = await db.query(sql`SELECT * FROM users WHERE uuid = ${uuid} LIMIT 1;`);
     return rows[0];
   }
 };

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Byteframe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/backend/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/backend/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/backend/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/backend/favicon/site.webmanifest">
+  <style type="text/css">
+    @font-face {
+      font-family: "LIBRARY 3 AM";
+      src: url("/backend/fonts/Library3am.otf") format("opentype");
+    }
+
+    @font-face {
+      font-family: "Poppins";
+      src: url("/backend/fonts/Poppins-Regular.otf") format("opentype");
+    }
+
+    @font-face {
+      font-family: "Poppins";
+      src: url("/backend/fonts/Poppins-Italic.otf") format("opentype");
+      font-style: italic;
+    }
+
+    @font-face {
+      font-family: "Poppins";
+      src: url("/backend/fonts/Poppins-Bold.otf") format("opentype");
+      font-weight: bold;
+    }
+
+    body {
+      padding: 5px 15px;
+    }
+
+    .header {
+      font-family: "LIBRARY 3 AM", sans-serif;
+      font-size: 54px;
+      border-bottom: 1px solid;
+    }
+
+    .app-container {
+      font-family: Poppins, sans-serif;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-container {
+      display: flex;
+      flex-direction: row;
+      margin-top: 15px;
+      align-items: center;
+    }
+
+    .input-style {
+      width: 300px;
+      height: 32px;
+      border: 1px solid;
+      margin-left: 12px;
+      border-radius: 2px;
+      padding: 0 5px;
+      font-size: 14px;
+      font-style: italic;
+      font-family: Poppins, sans-serif;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    select {
+      -webkit-appearance: none;
+      -webkit-border-radius: 2px;
+      background-image: url("data:image/svg+xml;utf8,<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='24' height='24' viewBox='0 0 24 24'><path fill='%23444' d='M7.406 7.828l4.594 4.594 4.594-4.594 1.406 1.406-6 6-6-6z'></path></svg>");
+      background-position: 100% 50%;
+      background-repeat: no-repeat;
+      background-color: white;
+      height: 34px !important;
+    }
+
+    .schedule-container {
+      margin: 65px 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .schedule-info {
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+
+    .schedule-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .schedule-title {
+      margin-top: 15px;
+      width: 150px;
+    }
+
+    .input-name {
+      margin-left: 20px;
+      max-width: 300px;
+    }
+
+    .input-start {
+      margin-left: 20px;
+      max-width: 300px;
+    }
+
+    .input-image {
+      margin-left: 20px;
+      max-width: 180px;
+    }
+
+    .btn {
+      width: 200px;
+      height: 34px;
+      border: 3px solid;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      margin: 15px 0 0 20px;
+    }
+
+    .no-margin-left {
+      margin-left: 0;
+    }
+
+    .add-btn {
+      margin-top: 25px;
+    }
+
+    .save-btn {
+      height: 44px;
+      margin-top: 0;
+    }
+
+    .save-btn-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .save-info {
+      font-weight: bold;
+      margin-left: 20px;
+    }
+
+    .del-sch {
+      border: 2px solid;
+      border-radius: 50px;
+      margin-right: 5px;
+      width: 22px;
+      height: 22px;
+      display: inline-block;
+      text-align: center;
+      cursor: pointer;
+      line-height: 22px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    #overlay {
+      position: fixed;
+      display: none;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 2;
+      cursor: pointer;
+    }
+    #text{
+      font-family: Poppins, sans-serif;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-size: 50px;
+      color: white;
+      text-align: center;
+      transform: translate(-50%,-50%);
+      -ms-transform: translate(-50%,-50%);
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    let schIndex = 0;
+    let schs = [];
+
+    $(document).ready(function () {
+      schs = JSON.parse(("{{sch_json}}").replace(/&quot;/g, '"'));
+      for (const [i, sch] of schs.entries()) {
+        $("#schedule-title-" + sch.id).text(i + 1);
+        $("#image" + sch.id + "-select").val(sch.image);
+        schIndex = i + 1;
+      }
+    });
+
+    function uuidv4() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    function addSchedule() {
+      const id = uuidv4();
+      schs.push({id: id});
+      $(".schedule-item-container").append(
+        '<div class="schedule-item" id="schedule-item' + id + '">\n' +
+        '  <div class="schedule-title"><span class="del-sch" onclick="deleteSch(\'' + id + '\')">X</span>Schedule #<span id="schedule-title-' + id + '">' + ++schIndex + '</span></div>' +
+        '  <div class="input-container input-name">\n' +
+        '    <label for="name' + id + '">Name:</label>\n' +
+        '    <input type="text" id="name' + id + '" name="name' + id + '" class="input-style">\n' +
+        '  </div>\n' +
+        '  <div class="input-container input-start">\n' +
+        '    <label for="start' + id + '">Start:</label>\n' +
+        '    <input type="text" id="start' + id + '" name="start' + id + '" class="input-style">\n' +
+        '  </div>\n' +
+        '  <div class="input-container input-image">\n' +
+        '    <label for="image' + id + '-select">Image:</label>\n' +
+        '    <select name="image' + id + '" id="image' + id + '-select" class="input-style">\n' +
+        '      <option value="artwork">artwork</option>\n' +
+        '      <option value="city">city</option>\n' +
+        '      <option value="commute">commute</option>\n' +
+        '    </select>\n' +
+        '  </div>\n' +
+        '  <button class="btn">Preview</button>\n' +
+        '</div>'
+      );
+    }
+
+    function deleteSch(id) {
+      schs = schs.filter(sch => sch.id != id);
+      $("#schedule-item" + id).remove()
+    }
+
+    function save() {
+      let data = {};
+      data.home = $("#home").val();
+      data.work = $("#work").val();
+      data.travel_mode = $("#travel_mode").val();
+      data.schedules = [];
+      for(const sch of schs) {
+        let s = {};
+        if (!isNaN(sch.id)) s.id = sch.id;
+        s.name = $("#name" + sch.id).val();
+        s.cron_exp = $("#start" + sch.id).val();
+        s.image = $("#image" + sch.id + "-select").val();
+        data.schedules.push(s)
+      }
+
+      $.ajax({
+        type: "POST",
+        url: window.location.href,
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function (c, s) {
+          if (c && c.message) {
+            $(".save-info").text(s + ": " + c.message);
+          } else {
+            $(".save-info").text(s);
+          }
+          $("#overlay").show();
+        },
+        error: function (r, s, e) {
+          if (r && r.responseJSON && r.responseJSON.message) {
+            $(".save-info").text(s + ": " + r.responseJSON.message);
+          } else {
+            $(".save-info").text(s + ": " + e);
+          }
+        }
+      });
+    }
+  </script>
+</head>
+<body>
+<header class="header">BYTEFRAME</header>
+<div class="app-container">
+  <div class="addr-container">
+    <div class="input-container">
+      <label for="home">Home address:</label>
+      <input type="text" id="home" name="home" class="input-style" value="{{user.home}}">
+    </div>
+    <div class="input-container">
+      <label for="work">Work address:</label>
+      <input type="text" id="work" name="work" class="input-style" value="{{user.work}}">
+    </div>
+    <div class="input-container">
+      <label for="travel_mode">Travel mode:</label>
+      <select name="travel_mode" id="travel_mode" class="input-style">
+        {{#travel_mode}}
+        <option value="{{name}}" {{selected}}>{{name}}</option>
+        {{/travel_mode}}
+      </select>
+    </div>
+  </div>
+  <div class="schedule-container">
+    <div class="schedule-info">Schedule start times use the <a href="https://en.wikipedia.org/wiki/Cron">cron expression</a> format, plus "sunrise" or "sunset" in place of hours and minutes.</div>
+    <div class="schedule-item-container">
+      {{#schedules}}
+      <div class="schedule-item" id="schedule-item{{id}}">
+        <div class="schedule-title"><span class="del-sch" onclick="deleteSch('{{id}}')">X</span>Schedule #<span id="schedule-title-{{id}}"></span></div>
+        <div class="input-container input-name">
+          <label for="name{{id}}">Name:</label>
+          <input type="text" id="name{{id}}" name="name{{id}}" class="input-style" value="{{name}}">
+        </div>
+        <div class="input-container input-start">
+          <label for="start{{id}}">Start:</label>
+          <input type="text" id="start{{id}}" name="start{{id}}" class="input-style" value="{{cron_exp}}">
+        </div>
+        <div class="input-container input-image">
+          <label for="image{{id}}-select">Image:</label>
+          <select name="image{{id}}" id="image{{id}}-select" class="input-style">
+            {{#image_choose}}
+            <option value="{{.}}">{{.}}</option>
+            {{/image_choose}}
+          </select>
+        </div>
+        <button class="btn">Preview</button>
+      </div>
+      {{/schedules}}
+    </div>
+    <button class="btn no-margin-left add-btn" onclick="addSchedule()">+ Add schedule</button>
+  </div>
+  <div class="save-btn-container">
+    <button class="btn no-margin-left save-btn" onclick="save()">SAVE</button>
+    <div class="save-info"></div>
+  </div>
+</div>
+<div id="overlay">
+  <div id="text">Please refresh the page</div>
+</div>
+</body>
+</html>

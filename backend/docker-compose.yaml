@@ -7,8 +7,9 @@ services:
     depends_on:
       - postgres
     environment:
+      GOOGLE_KEY: "xxx"
+      URL_BACKEND: "https://byteframe.etiennepasteur.com/"
       DATABASE_URL: postgres://user:pass@postgres:5432/db
-      NODE_ENV: development
       PORT: 3000
     ports:
       - "3000:3000"
@@ -22,7 +23,12 @@ services:
     image: postgres:10.4
     ports:
       - "35432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
       POSTGRES_DB: db
+
+volumes:
+  postgres-data:
